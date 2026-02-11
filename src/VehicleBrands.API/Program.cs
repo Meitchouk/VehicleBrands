@@ -154,7 +154,7 @@ static async Task ApplyMigrationsAndSeedAsync(IServiceProvider services)
             var delayMs = initialDelayMs * (int)Math.Pow(2, attempt - 1);
             delayMs = Math.Min(delayMs, 30000); // Cap at 30 seconds
 
-            logger.LogWarning(ex, "Database connection failed on attempt {Attempt}/{MaxRetries}. Retrying in {DelaySeconds} seconds...", 
+            logger.LogWarning(ex, "Database connection failed on attempt {Attempt}/{MaxRetries}. Retrying in {DelaySeconds} seconds...",
                 attempt, maxRetries, delayMs / 1000);
 
             await Task.Delay(delayMs);
