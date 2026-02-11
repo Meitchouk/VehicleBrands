@@ -48,6 +48,46 @@ docker-compose up --build
 # Health Check: http://localhost:8080/health
 ```
 
+### Verificar que funciona
+
+Una vez que los contenedores estén corriendo, se puede probar con los siguientes comandos:
+
+```bash
+# 1. Verificar que los contenedores están activos
+docker-compose ps
+
+# 2. Health check - verificar conectividad con la base de datos
+curl http://localhost:8080/health
+
+# 3. Obtener todas las marcas de autos (56 marcas precargadas)
+curl http://localhost:8080/api/v1/MarcasAutos
+
+# 4. Obtener una marca por ID
+curl http://localhost:8080/api/v1/MarcasAutos/1
+
+# 5. Filtrar marcas por país
+curl "http://localhost:8080/api/v1/MarcasAutos?country=Japan"
+
+# 6. Filtrar marcas de lujo
+curl "http://localhost:8080/api/v1/MarcasAutos?isLuxury=true"
+
+# 7. Ordenar por año de fundación descendente
+curl "http://localhost:8080/api/v1/MarcasAutos?sortBy=foundedYear&sortDirection=desc"
+
+# 8. Crear una nueva marca
+curl -X POST http://localhost:8080/api/v1/MarcasAutos \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Pagani","countryOfOrigin":"Italy","foundedYear":1992,"isLuxury":true,"headquarters":"San Cesario sul Panaro","website":"https://www.pagani.com"}'
+
+# 9. Detener los contenedores
+docker-compose down
+
+# 10. Detener y eliminar volúmenes (reset completo de la BD)
+docker-compose down -v
+```
+
+También se puede acceder a **Swagger UI** en http://localhost:8080/swagger para probar los endpoints de forma interactiva desde el navegador.
+
 ## Desarrollo Local
 
 ```bash
