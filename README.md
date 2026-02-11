@@ -159,19 +159,6 @@ dotnet test
 dotnet test --collect:"XPlat Code Coverage" --settings:coverlet.runsettings
 ```
 
-### Cobertura de Código
-
-| Módulo | Líneas | Ramas | Métodos |
-|--------|--------|-------|---------|
-| VehicleBrands.API | 100% | 100% | 100% |
-| VehicleBrands.Domain | 100% | 100% | 100% |
-| VehicleBrands.Infrastructure | 99.3% | 75% | 100% |
-| **Total** | **99.6%** | **75%** | **100%** |
-
-**81 pruebas** distribuidas en: Controladores, Repositorio, DbContext, DTOs, Mappings y Middleware.
-
-> Se excluyen del cálculo las migraciones (código autogenerado por EF Core) y `Program.cs` (código de startup).
-
 ---
 
 ## Docker Compose

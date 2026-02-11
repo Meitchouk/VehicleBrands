@@ -1,6 +1,4 @@
-# ──────────────────────────────────────────────────
 # Stage 1: Restore dependencies (layer caching)
-# ──────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore
 WORKDIR /src
 
@@ -14,22 +12,16 @@ COPY tests/VehicleBrands.Tests/VehicleBrands.Tests.csproj tests/VehicleBrands.Te
 
 RUN dotnet restore VehicleBrands.sln
 
-# ──────────────────────────────────────────────────
 # Stage 2: Build the application
-# ──────────────────────────────────────────────────
 FROM restore AS build
 COPY . .
 RUN dotnet build VehicleBrands.sln -c Release --no-restore
 
-# ──────────────────────────────────────────────────
 # Stage 3: Publish the API
-# ──────────────────────────────────────────────────
 FROM build AS publish
 RUN dotnet publish src/VehicleBrands.API/VehicleBrands.API.csproj -c Release --no-build -o /app/publish
 
-# ──────────────────────────────────────────────────
 # Stage 4: Final optimized image (runtime only)
-# ──────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 

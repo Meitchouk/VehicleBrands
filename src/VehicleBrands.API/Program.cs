@@ -7,9 +7,7 @@ using VehicleBrands.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ──────────────────────────────────────────────────
 // Register services in the DI container
-// ──────────────────────────────────────────────────
 
 // Infrastructure layer services (DbContext + Repositories)
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -60,13 +58,11 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
-// ──────────────────────────────────────────────────
 // Apply pending migrations and seed database.
 // Migrate() is idempotent — it only applies migrations
 // not yet recorded in __EFMigrationsHistory.
 // DatabaseSeeder is intelligent — it only adds brands
 // that don't already exist (checks by name).
-// ──────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -79,9 +75,7 @@ using (var scope = app.Services.CreateScope())
     await DatabaseSeeder.SeedAsync(dbContext, logger);
 }
 
-// ──────────────────────────────────────────────────
 // HTTP middleware pipeline
-// ──────────────────────────────────────────────────
 
 // Global error handling — must be first to catch all exceptions
 app.UseGlobalExceptionHandling();

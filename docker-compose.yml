@@ -1,12 +1,8 @@
-# ──────────────────────────────────────────────────
 # Docker Compose for Vehicle Brands API
 # Sets up two services: PostgreSQL and the REST API
-# ──────────────────────────────────────────────────
 
 services:
-  # ──────────────────────────────────────────────────
   # PostgreSQL Database Service
-  # ──────────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     container_name: vehiclebrands-db
@@ -25,9 +21,7 @@ services:
       retries: 5
     restart: unless-stopped
 
-  # ──────────────────────────────────────────────────
   # REST API Service
-  # ──────────────────────────────────────────────────
   api:
     build:
       context: .
