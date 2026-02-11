@@ -60,22 +60,9 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
-// Apply pending migrations and seed database.
-// Migrate() is idempotent — it only applies migrations
-// not yet recorded in __EFMigrationsHistory.
-// DatabaseSeeder is intelligent — it only adds brands
-// that don't already exist (checks by name).
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-
-    // Apply pending migrations
-    dbContext.Database.Migrate();
-
-    // Seed database with 50+ car brands (only if they don't exist)
-    await DatabaseSeeder.SeedAsync(dbContext, logger);
-}
+// Apply pending migrations and seed database with retry logic for cloud deployments.
+// Railway/cloud platforms may need a few seconds for the database to become available.
+await ApplyMigrationsAndSeedAsync(app.Services);
 
 // HTTP middleware pipeline
 
@@ -118,3 +105,59 @@ app.MapHealthChecks("/health", new HealthCheckOptions
 });
 
 app.Run();
+
+// Apply EF Core migrations and seed the database with retry logic.
+// Railway and other cloud platforms may need time for the database to become available.
+static async Task ApplyMigrationsAndSeedAsync(IServiceProvider services)
+{
+    const int maxRetries = 10;
+    const int initialDelayMs = 1000;
+
+    for (int attempt = 1; attempt <= maxRetries; attempt++)
+    {
+        try
+        {
+            using var scope = services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+            logger.LogInformation("Attempting to connect to database... (Attempt {Attempt}/{MaxRetries})", attempt, maxRetries);
+
+            // Test database connectivity
+            await dbContext.Database.CanConnectAsync();
+            logger.LogInformation("Database connection successful.");
+
+            // Apply pending migrations (idempotent - only applies new migrations)
+            logger.LogInformation("Applying database migrations...");
+            await dbContext.Database.MigrateAsync();
+            logger.LogInformation("Migrations applied successfully.");
+
+            // Seed database with car brands (intelligent - checks for existing data)
+            logger.LogInformation("Seeding database...");
+            await DatabaseSeeder.SeedAsync(dbContext, logger);
+            logger.LogInformation("Database seeding completed.");
+
+            return; // Success - exit retry loop
+        }
+        catch (Exception ex)
+        {
+            using var scope = services.CreateScope();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+            if (attempt == maxRetries)
+            {
+                logger.LogCritical(ex, "Failed to initialize database after {MaxRetries} attempts. Application will start but may not function correctly.", maxRetries);
+                return; // Give up after max retries - let app start anyway for health checks to work
+            }
+
+            // Exponential backoff: 1s, 2s, 4s, 8s, 16s, 32s...
+            var delayMs = initialDelayMs * (int)Math.Pow(2, attempt - 1);
+            delayMs = Math.Min(delayMs, 30000); // Cap at 30 seconds
+
+            logger.LogWarning(ex, "Database connection failed on attempt {Attempt}/{MaxRetries}. Retrying in {DelaySeconds} seconds...", 
+                attempt, maxRetries, delayMs / 1000);
+
+            await Task.Delay(delayMs);
+        }
+    }
+}

@@ -94,6 +94,65 @@ docker-compose down -v
 
 También se puede acceder a **Swagger UI** en http://localhost:8080/swagger para probar los endpoints de forma interactiva desde el navegador.
 
+---
+
+## Despliegue en Railway
+
+Railway detecta automáticamente el Dockerfile y despliega la aplicación. Sigue estos pasos:
+
+### 1. Crear cuenta y proyecto en Railway
+
+1. Visita [railway.app](https://railway.app) y crea una cuenta
+2. Crea un nuevo proyecto
+3. Conecta tu repositorio de GitHub
+
+### 2. Agregar PostgreSQL
+
+1. En tu proyecto Railway, haz clic en **"+ New"**
+2. Selecciona **"Database"** → **"PostgreSQL"**
+3. Railway creará automáticamente la variable `DATABASE_URL`
+
+### 3. Configurar Variables de Entorno (opcional)
+
+Railway configura automáticamente `DATABASE_URL`, pero puedes ajustar:
+
+```bash
+ASPNETCORE_ENVIRONMENT=Production
+ASPNETCORE_URLS=http://0.0.0.0:$PORT
+```
+
+### 4. Desplegar
+
+Railway desplegará automáticamente cada vez que hagas push a la rama principal. La aplicación:
+
+- ✅ Detecta automáticamente `DATABASE_URL` de Railway
+- ✅ Aplica migraciones de Entity Framework al iniciar
+- ✅ Hace seeding de 56 marcas de autos automáticamente
+- ✅ Incluye retry logic (10 intentos con exponential backoff) para esperar a que PostgreSQL esté listo
+- ✅ Soporta SSL requerido por Railway
+
+### 5. Verificar el Despliegue
+
+Una vez desplegado, prueba los endpoints:
+
+```bash
+# Reemplaza <tu-app>.railway.app con tu URL de Railway
+curl https://<tu-app>.railway.app/health
+curl https://<tu-app>.railway.app/api/v1/Diagnostics/info
+curl https://<tu-app>.railway.app/api/v1/MarcasAutos
+```
+
+### Troubleshooting Railway
+
+Si el despliegue falla:
+
+1. **Verifica los logs** en Railway Dashboard
+2. **Confirma que PostgreSQL está corriendo** (debe estar "Healthy")
+3. **Verifica DATABASE_URL** en las variables de entorno
+4. **El health check tarda ~30-60 segundos** en la primera ejecución (migraciones + seeding)
+
+---
+
 ## Desarrollo Local
 
 ```bash
