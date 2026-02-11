@@ -59,6 +59,12 @@ docker-compose ps
 # 2. Health check - verificar conectividad con la base de datos
 curl http://localhost:8080/health
 
+# 2a. Verificar información del API (versión, uptime, recursos)
+curl http://localhost:8080/api/v1/Diagnostics/info
+
+# 2b. Verificar estado rápido
+curl http://localhost:8080/api/v1/Diagnostics/status
+
 # 3. Obtener todas las marcas de autos (56 marcas precargadas)
 curl http://localhost:8080/api/v1/MarcasAutos
 
@@ -111,6 +117,8 @@ Se configuró `ApplicationDbContext` utilizando Entity Framework Core con el pro
 
 ## Endpoints
 
+### Gestión de Marcas de Autos
+
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | GET | `/api/v1/MarcasAutos` | Obtener todas las marcas de autos |
@@ -118,7 +126,18 @@ Se configuró `ApplicationDbContext` utilizando Entity Framework Core con el pro
 | POST | `/api/v1/MarcasAutos` | Crear una nueva marca |
 | PUT | `/api/v1/MarcasAutos/{id}` | Actualizar una marca existente |
 | DELETE | `/api/v1/MarcasAutos/{id}` | Eliminar una marca (soft delete) |
-| GET | `/health` | Health check (conectividad BD) |
+
+### Diagnóstico y Monitoreo
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/api/v1/Diagnostics/info` | Información del API (versión, ambiente, uptime, recursos) |
+| GET | `/api/v1/Diagnostics/version` | Detalles de versión del API |
+| GET | `/api/v1/Diagnostics/time` | Hora del servidor (UTC y local) |
+| GET | `/api/v1/Diagnostics/status` | Estado rápido del API |
+| GET | `/health` | Health check completo con detalles en JSON |
+| GET | `/health/ready` | Readiness probe (verifica conectividad BD) |
+| GET | `/health/live` | Liveness probe (verifica que el proceso esté activo) |
 
 ### Parámetros de Consulta (GET /MarcasAutos)
 

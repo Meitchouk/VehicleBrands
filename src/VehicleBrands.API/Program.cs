@@ -1,5 +1,7 @@
 using System.Reflection;
 using Asp.Versioning;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using VehicleBrands.API.Middleware;
 using VehicleBrands.Infrastructure;
@@ -92,7 +94,27 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Health check endpoint — used by Docker, load balancers, and orchestrators
-app.MapHealthChecks("/health");
+// Health check endpoints for monitoring and orchestration
+// Liveness probe - checks if the application process is running
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false, // Don't run any checks, just verify the process is alive
+    AllowCachingResponses = false
+});
+
+// Readiness probe - checks if the application is ready to serve requests (DB connectivity)
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"),
+    AllowCachingResponses = false,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
+
+// Detailed health check with full JSON response
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    AllowCachingResponses = false,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 
 app.Run();
