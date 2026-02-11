@@ -1,0 +1,41 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+publish/
+out/
+
+## IDE
+.vs/
+.vscode/
+*.swp
+*~
+*.sln.docstates
+
+## Test Results
+TestResults/
+coverage.cobertura.xml
+coverlet.runsettings
+
+## Docker
+postgres_data/
+
+## OS
+Thumbs.db
+.DS_Store
+ehthumbs.db
+Desktop.ini
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+## Misc
+1

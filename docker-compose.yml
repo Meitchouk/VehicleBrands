@@ -1,0 +1,47 @@
+# ──────────────────────────────────────────────────
+# Docker Compose for Vehicle Brands API
+# Sets up two services: PostgreSQL and the REST API
+# ──────────────────────────────────────────────────
+
+services:
+  # ──────────────────────────────────────────────────
+  # PostgreSQL Database Service
+  # ──────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: vehiclebrands-db
+    environment:
+      POSTGRES_DB: VehicleBrandsDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d VehicleBrandsDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────────
+  # REST API Service
+  # ──────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vehiclebrands-api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=VehicleBrandsDb;Username=postgres;Password=postgres123
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
