@@ -12,7 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Register services in the DI container
 
 // Infrastructure layer services (DbContext + Repositories)
-builder.Services.AddInfrastructure(builder.Configuration);
+// Resolve connection string once — used by both DbContext and health checks
+var connectionString = DependencyInjection.ResolveConnectionString(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, connectionString);
 
 // MVC Controllers
 builder.Services.AddControllers();
@@ -54,14 +56,13 @@ builder.Services.AddSwaggerGen(options =>
 // Health Checks — validates database connectivity
 builder.Services.AddHealthChecks()
     .AddNpgSql(
-        builder.Configuration.GetConnectionString("DefaultConnection")!,
+        connectionString,
         name: "postgresql",
         tags: ["db", "ready"]);
 
 var app = builder.Build();
 
 // Apply pending migrations and seed database with retry logic for cloud deployments.
-// Railway/cloud platforms may need a few seconds for the database to become available.
 await ApplyMigrationsAndSeedAsync(app.Services);
 
 // HTTP middleware pipeline
@@ -107,7 +108,6 @@ app.MapHealthChecks("/health", new HealthCheckOptions
 app.Run();
 
 // Apply EF Core migrations and seed the database with retry logic.
-// Railway and other cloud platforms may need time for the database to become available.
 static async Task ApplyMigrationsAndSeedAsync(IServiceProvider services)
 {
     const int maxRetries = 10;

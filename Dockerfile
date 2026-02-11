@@ -36,6 +36,6 @@ EXPOSE 8080
 
 # ASP.NET Core environment variables
 ENV ASPNETCORE_URLS=http://+:8080
-ENV ASPNETCORE_ENVIRONMENT=Docker
+ENV ASPNETCORE_ENVIRONMENT=Production
 
 ENTRYPOINT ["dotnet", "VehicleBrands.API.dll"]
