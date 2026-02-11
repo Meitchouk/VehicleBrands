@@ -19,6 +19,7 @@ out/
 
 ## Test Results
 TestResults/
+coverage-report/
 coverage.cobertura.xml
 coverlet.runsettings
 

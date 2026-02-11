@@ -170,13 +170,36 @@ Todas las respuestas siguen un formato estándar:
 
 ## Pruebas Unitarias
 
+### Ejecutar pruebas
+
 ```bash
 # Ejecutar todas las pruebas
 dotnet test
 
-# Ejecutar con cobertura de código
+# Ejecutar con cobertura de código detallada
 dotnet test --collect:"XPlat Code Coverage" --settings:coverlet.runsettings
 ```
+
+### Visualizar Reporte de Cobertura
+
+Desde el navegador, se puede ver un reporte HTML interactivo con el coverage de código:
+
+```powershell
+# 1. Generar el reporte (requiere tener ReportGenerator instalado)
+dotnet tool install -g dotnet-reportgenerator-globaltool
+
+# 2. Crear el reporte HTML desde los archivos de coverage
+reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coverage-report"
+
+# 3. Abrir en el navegador
+Start-Process "coverage-report/index.html"
+```
+
+**Nota:** La carpeta `coverage-report/` se genera automáticamente y se ignora en Git (`.gitignore`). Regenerarla cada vez que ejecutes las pruebas.
+
+#### Ejemplo del Reporte de Cobertura
+
+![Coverage Report](img/coverage/image.png)
 
 ---
 
